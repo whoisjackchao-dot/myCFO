@@ -1,91 +1,106 @@
 # myCFO
 
-> 面向中国大陆小微企业（默认**服装电商零售**：拼多多 / 淘宝天猫 / 抖音）的 **CFO Agent 技能包**。
+> 面向中国大陆小微企业（默认**服装电商零售**：拼多多 / 淘宝天猫 / 抖音）的 **CFO Agent 技能包**，同时是一个**可直接装进 DSH 的插件**。
 > 让 AI 以 CFO 视角回答：这个月交多少税、钱够不够、哪个款在亏、要不要转一般纳税人。
 
-不是 SaaS，不是记账软件。它是一套给 AI Agent 用的**技能文件 + 可执行计算脚本**：
-Agent 读 `SKILL.md` 决定流程，读 `references/` 拿专业口径，跑 `scripts/` 出确定性的数字。
+不是 SaaS，不是记账软件。它由三部分组成：**技能文件**（Agent 读的流程与专业口径）+ **可执行脚本**（确定性的计算）+ **DSH 插件壳**（一次安装，自动出现在技能目录）。
+
+## 一键部署到 DSH
+
+### 方式 A：从 GitHub 直接装（推荐）
+
+```bash
+dsh plugin --profile desktop add github:whoisjackchao-dot/myCFO
+```
+
+DSH 会用 pnpm 把本仓库装进 profile，并自动加入 `dsh.profile.bundles`。**重启 DSH** 后生效。
+
+### 方式 B：克隆后运行安装脚本
+
+```powershell
+git clone https://github.com/whoisjackchao-dot/myCFO.git
+cd myCFO
+.\install.ps1              # Windows；默认装到 desktop profile
+# 或
+bash install.sh            # macOS / Linux
+```
+
+卸载：`dsh plugin --profile desktop remove dsh-mycfo`（或 `.\install.ps1 -Uninstall`）。
+
+### 方式 C：不用插件，只当技能用
+
+```bash
+git clone https://github.com/whoisjackchao-dot/myCFO.git /tmp/myCFO
+cp -r /tmp/myCFO/skill ~/.dsh/skills/company-ops
+```
+
+适用于任何支持 `SKILL.md` 的 Agent（Claude Code、OpenCode、Cursor 等），把 `skill/` 目录放进去即可。
+
+### 装好后怎么用
+
+任意会话里自然语言触发：
+
+> 「帮我做一次公司体检」「这个月要交多少税」「赚钱但没钱为什么」「有没有合法的节税办法」「要不要转一般纳税人」「这个款还赚不赚钱」
+
+### 插件是怎么工作的
+
+```
+package.json          dsh.bundle.patch → cordis.patch.yml   （声明为 profile 的一层）
+cordis.patch.yml      - insert: { id: mycfo-skill, name: dsh-mycfo }
+lib/index.js          apply(ctx) → ctx.skills.register({...}) 读自带 skill/SKILL.md
+```
+
+- **只读注册**：插件不写用户文件、不改 profile 配置、不联网。
+- **资源路径自动解析**：注册时把 `skill/` 设为资源基目录，Agent 看到的是「Base directory for this skill: …」，`references/`、`scripts/`、`assets/` 都能按相对路径找到并执行。
+- **失败隔离**：`SKILL.md` 缺失或 frontmatter 不合法时只打印告警，不会影响 profile 启动。
+- **不受位置影响**：从 npm、GitHub、本地目录安装都能工作，因为路径取自 `import.meta.url`。
 
 ## 能做什么
 
 | 能力 | 入口 | 说明 |
 |---|---|---|
-| 报税与合规日历 | `references/tax-cn.md` | 2026 年度官方征期（税总办征科函〔2025〕64 号）、各税种税率、优惠、处罚 |
-| 税负测算 | `scripts/checkup.py` | 增值税 + 附加税费 + 印花税 + 企业所得税预缴，含红黄绿灯预警 |
-| 税务筹划（合法） | `references/tax-planning.md` | T1–T9 工具箱（免征额、500 万临界、小微 5%、年终奖、加计扣除…）+ 7 条禁区 |
-| 小规模 vs 一般纳税人 | `scripts/tax_mode_compare.py` | 税负断崖、进项票敏感性、临界比例、**300 万所得税悬崖**、500 万双口径 |
-| 电商经营模型 | `references/ecommerce-retail.md` | GMV→收入桥、平台费率与账期、退货准备金、库存与售罄、爆量现金流陷阱 |
-| 单元经济 | `scripts/ecom_unit_econ.py` | 单品贡献率、保本 ROAS、保本售价、退货敏感性、SKU ABC/滞销预警 |
-| CPA 级会计 | `references/ecommerce-accounting.md` | 总额法/净额法、10 类分录、月末结账 10 步、成本核算、三表编制、三方对账 |
-| 电商税务专题 | `references/ecommerce-tax.md` | 无票采购五条合规路径、500 万/300 万双悬崖、达人佣金、刷单、稽查关注点 |
-| 财务分析与预算 | `references/financial-analysis.md`、`budget-cashflow.md` | 三表勾稽、40+ 比率、杜邦、诊断树、13 周现金流、保本点 |
-| 开源资源地图 | `references/open-source-map.md` | 会计/税务/ERP/对账/BI 可复用项目（star/license 已核实） |
+| 报税与合规日历 | `skill/references/tax-cn.md` | 2026 年度官方征期（税总办征科函〔2025〕64 号）、各税种税率、优惠、处罚 |
+| 税负测算 | `skill/scripts/checkup.py` | 增值税 + 附加税费 + 印花税 + 企业所得税预缴，含红黄绿灯预警 |
+| 税务筹划（合法） | `skill/references/tax-planning.md` | T1–T9 工具箱（免征额、500 万临界、小微 5%、年终奖、加计扣除…）+ 7 条禁区 |
+| 小规模 vs 一般纳税人 | `skill/scripts/tax_mode_compare.py` | 税负断崖、进项票敏感性、临界比例、**300 万所得税悬崖**、500 万双口径 |
+| 电商经营模型 | `skill/references/ecommerce-retail.md` | GMV→收入桥、平台费率与账期、退货准备金、库存与售罄、爆量现金流陷阱 |
+| 单元经济 | `skill/scripts/ecom_unit_econ.py` | 单品贡献率、保本 ROAS、保本售价、退货敏感性、SKU ABC/滞销预警 |
+| CPA 级会计 | `skill/references/ecommerce-accounting.md` | 总额法/净额法、10 类分录、月末结账 10 步、成本核算、三表编制、三方对账 |
+| 电商税务专题 | `skill/references/ecommerce-tax.md` | 无票采购五条合规路径、500 万/300 万双悬崖、达人佣金、刷单、稽查关注点 |
+| 财务分析与预算 | `skill/references/financial-analysis.md`、`budget-cashflow.md` | 三表勾稽、40+ 比率、杜邦、诊断树、13 周现金流、保本点 |
+| 开源资源地图 | `skill/references/open-source-map.md` | 会计/税务/ERP/对账/BI 可复用项目（star/license 已核实） |
 
-## 快速开始
+## 直接跑脚本（不经过 Agent）
 
-### 1. 安装成技能
-
-```bash
-# DeepSeek Harness
-git clone https://github.com/whoisjackchao-dot/myCFO.git ~/.dsh/skills/company-ops
-
-# Claude Code
-git clone https://github.com/whoisjackchao-dot/myCFO.git ~/.claude/skills/company-ops
-
-# OpenCode / 其他支持 skills 的 Agent
-git clone https://github.com/whoisjackchao-dot/myCFO.git .opencode/skills/company-ops
-```
-
-也可以直接把本仓库复制到任意 skills 目录，或让 Agent 直接读取 `SKILL.md`。
-
-### 2. 首次使用：建档
-
-按 `assets/company-profile.md`（通用）或 `assets/ecommerce-profile.md`（电商）填一份 JSON。电商场景要三份：
-
-| 文件 | 给谁用 |
-|---|---|
-| `company-data.json` | `checkup.py`（月度体检） |
-| `tax-data.json` | `tax_mode_compare.py`（身份决策） |
-| `unit-data.json` | `ecom_unit_econ.py`（单元经济） |
-
-仓库里带了三份示例：`assets/sample-company.json`、`assets/sample-ecommerce-tax.json`、`assets/sample-ecommerce-unit.json`。
-
-### 3. 跑起来
+三个脚本无第三方依赖（Python 3.8+ 标准库），Windows 控制台自动切 UTF-8：
 
 ```bash
-python scripts/checkup.py assets/sample-company.json            # 月度体检报告
-python scripts/tax_mode_compare.py assets/sample-ecommerce-tax.json
-python scripts/ecom_unit_econ.py assets/sample-ecommerce-unit.json
+python skill/scripts/checkup.py skill/assets/sample-company.json
+python skill/scripts/tax_mode_compare.py skill/assets/sample-ecommerce-tax.json
+python skill/scripts/ecom_unit_econ.py skill/assets/sample-ecommerce-unit.json
 
 # 机器可读输出
-python scripts/tax_mode_compare.py data.json --format json --out result.json
+python skill/scripts/tax_mode_compare.py skill/assets/sample-ecommerce-tax.json --format json
 ```
 
-三个脚本都**无第三方依赖**（Python 3.8+ 标准库），Windows 控制台自动切 UTF-8。
+自定义数据：按 `skill/assets/company-profile.md`（通用）或 `skill/assets/ecommerce-profile.md`（电商）填 JSON。电商场景要三份，分别给三个脚本用。
 
 ## 目录结构
 
 ```
 myCFO/
-├── SKILL.md                  # Agent 入口：铁律、流程、路由表、CFO 简报模板、合规红线
-├── references/               # 专业口径（Agent 按需加载）
-│   ├── tax-cn.md             # 中国小微税制 + 2026 征期
-│   ├── tax-planning.md       # 合法节税工具箱 + 禁区
-│   ├── financial-analysis.md # 三表勾稽、比率、杜邦、诊断树
-│   ├── budget-cashflow.md    # 预算、13 周现金流、保本点
-│   ├── ecommerce-retail.md   # 电商经营模型
-│   ├── ecommerce-accounting.md # CPA 会计处理
-│   ├── ecommerce-tax.md      # 无票采购 / 500 万 / 300 万悬崖
-│   └── open-source-map.md    # 开源资源地图
-├── scripts/
-│   ├── checkup.py            # 月度财务体检
-│   ├── tax_mode_compare.py   # 小规模 vs 一般纳税人
-│   └── ecom_unit_econ.py     # 电商单元经济
-├── assets/                   # 档案模板 + 示例数据 + 申报日历
-├── research/                 # 6 份 GitHub / 平台 / 政策调研笔记（含核实状态）
-└── docs/
-    ├── test-evidence.md      # 测试与缺陷修复记录
-    └── evidence/             # 基线（无技能）与回归（带技能）原始输出
+├── package.json          # DSH 插件清单：dsh.bundle / dshWorkshop
+├── cordis.patch.yml      # bundle patch：把插件作为一层挂进 profile
+├── lib/index.js          # Cordis 插件：注册 company-ops 技能
+├── install.ps1 / .sh     # 一键安装脚本
+├── test/smoke.mjs        # 冒烟测试（node test/smoke.mjs）
+├── skill/                # 技能本体（可单独复制到任意 skills 目录）
+│   ├── SKILL.md
+│   ├── references/       # 8 篇专业口径
+│   ├── scripts/          # 3 个计算脚本
+│   └── assets/           # 档案模板、申报日历、示例数据
+├── research/             # 6 份 GitHub / 平台 / 政策调研笔记（含核实状态）
+└── docs/                 # 测试与缺陷修复记录 + 基线/回归原始输出
 ```
 
 ## 一个真实画像的结论示例
@@ -118,12 +133,9 @@ myCFO/
 
 ## 测试与验证
 
-按"先看失败，再写技能"的流程做：
-
-- **基线（不带技能）**：两个独立 Agent 做同一题，都卡在 2026-10 征期（一个给错日期、一个不确定）；另一次基线给出了 300 万悬崖洞察——已吸收进模型。
-- **回归（带技能）**：按技能流程实跑，输出七段式 CFO 简报，并抓出脚本 4 个缺陷（附加税减半系数写反、季度销售额静默 ×3、13 周表缺税款科目、投流按 SKU 重复分摊）。
-
-明细见 [docs/test-evidence.md](docs/test-evidence.md)。
+- 插件冒烟测试：`node test/smoke.mjs`（校验注册出的 skill 定义、17 个资源文件、包清单）
+- 技能行为回归：RED（不带技能）→ GREEN（带技能），差异与 9 个已修复缺陷见 [docs/test-evidence.md](docs/test-evidence.md)
+- 脚本回归：三个示例数据均 0 退出码
 
 ## 数据来源与时效
 

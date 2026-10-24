@@ -1,0 +1,8 @@
+# Bundle patch for dsh-mycfo.
+#
+# 这一行使本包成为 profile 的一个「层」（bundle），而不只是一个普通依赖：
+# `insert` 把插件挂进配置树，`name` 必须等于 package.json 里的包名
+# （安装后从 profile 的 node_modules 解析）。
+- insert:
+    - id: mycfo-skill
+      name: dsh-mycfo

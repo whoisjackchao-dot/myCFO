@@ -2,6 +2,7 @@
 
 > 目标：证明这个技能不是"写给人看的文档"，而是经过"失败—修复—回归"的。
 > 方法：TDD 式流程——先让**不带技能**的 Agent 做同一道题（RED），记录失败模式；再写技能；再让**带技能**的 Agent 做（GREEN），差异即证据。
+> 另有插件层的冒烟、安装与注册表集成测试，见第七节。
 
 ## 一、测试用例
 
@@ -50,10 +51,10 @@
 ## 五、复现命令
 
 ```bash
-python scripts/checkup.py assets/sample-company.json
-python scripts/tax_mode_compare.py assets/sample-ecommerce-tax.json
-python scripts/ecom_unit_econ.py assets/sample-ecommerce-unit.json
-python scripts/tax_mode_compare.py assets/sample-ecommerce-tax.json --format json
+python skill/scripts/checkup.py skill/assets/sample-company.json
+python skill/scripts/tax_mode_compare.py skill/assets/sample-ecommerce-tax.json
+python skill/scripts/ecom_unit_econ.py skill/assets/sample-ecommerce-unit.json
+python skill/scripts/tax_mode_compare.py skill/assets/sample-ecommerce-tax.json --format json
 ```
 
 预期：均为 0 退出码；Markdown 报告含"一句话结论 / 税负 / 指标 / 预警 / 现金流 / 口径提醒"。
@@ -64,3 +65,14 @@ python scripts/tax_mode_compare.py assets/sample-ecommerce-tax.json --format jso
 - 平台费率部分为二手口径（天猫 5% 佣金、京东保证金等），已在调研笔记标注置信度；
 - 2027 年后 1% 征收率与小微 5% 是否延续未知，模型参数可改但需人工复核；
 - 未接入真实平台账单导出（无公开 API），对账流程需人工导出后按 `ecommerce-accounting.md` 执行。
+
+## 七、插件化（DSH）验证
+
+| 测试 | 方法 | 结果 |
+|---|---|---|
+| 冒烟 | `node test/smoke.mjs` | 通过：注册出 `company-ops`，正文 5,422 字符，17 个资源文件均存在，`dsh.bundle.patch` 存在 |
+| 插件层 | `dsh plugin --profile mycfo-test add <repo>` → `dsh --profile mycfo-test --dump-config` | profile 清单自动把 `dsh-mycfo` 追加进 `dsh.profile.bundles`；配置树出现 `- id: mycfo-skill` / `name: dsh-mycfo` |
+| 注册表集成 | 用真实 `@deepseek-ai/cordis` + `@deepseek-ai/dsh-skill` 挂载插件 | `ctx.skills.list()` 返回 `company-ops(runtime/runtime)`；`get()` 加载 5,422 字符，`resourceBase` 指向包内 `skill/` |
+| 真实安装 | `dsh plugin --profile desktop add <repo>` | 依赖、bundles、dump-config 均正确；重启 DSH 后生效 |
+
+**插件层发现的一个坑**：`ctx.skills.register()` 本身不校验 `source`，但注册表在 `get()` 加载时会校验（报错 `loaded skill source must be a string`）。因此运行时注册必须显式传 `source: 'runtime'`，否则技能能出现在目录里但一加载就报错。

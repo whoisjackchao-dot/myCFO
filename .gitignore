@@ -16,3 +16,7 @@ unit-data.json
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 插件安装产物
+node_modules/
+*.tgz

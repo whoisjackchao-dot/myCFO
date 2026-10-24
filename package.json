@@ -1,0 +1,92 @@
+{
+  "name": "dsh-mycfo",
+  "version": "1.0.0",
+  "description": "myCFO：小微企业 / 服装电商 CFO Agent 技能（DSH profile 插件）。报税合规、税负测算、经营诊断、预算现金流、电商单元经济与 CPA 级会计处理。",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "skill",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "skill",
+    "cfo",
+    "tax",
+    "ecommerce",
+    "small-business"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "whoisjackchao-dot",
+    "url": "https://github.com/whoisjackchao-dot"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whoisjackchao-dot/myCFO.git"
+  },
+  "homepage": "https://github.com/whoisjackchao-dot/myCFO#readme",
+  "bugs": {
+    "url": "https://github.com/whoisjackchao-dot/myCFO/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.2.0-rc.1"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dshWorkshop": {
+    "schema": "omdsh-workshop-package/v1",
+    "type": "plugin",
+    "integration": {
+      "protocol": "harness-profile",
+      "artifact": "cordis.patch.yml"
+    },
+    "install": {
+      "mode": "transactional",
+      "adapter": "profile-bundle",
+      "failurePolicy": "generation-rollback",
+      "touchesCurrentBeforeActivation": false
+    },
+    "lifecycle": {
+      "activation": "restart-profile",
+      "dispose": "supported"
+    },
+    "permissions": [
+      "fs:read"
+    ],
+    "compatibility": {
+      "dshVersions": [
+        "0.2.0-rc.1"
+      ]
+    },
+    "capability": {
+      "id": "mycfo-skill",
+      "kind": "skill",
+      "invocation": "安装后在任一会话说「报税」「要交多少税」「公司体检」「电商 GMV」「要不要转一般纳税人」「无票采购」，模型会从技能目录加载 company-ops。",
+      "expected": "company-ops 出现在会话可用技能目录中；加载后返回完整 SKILL.md 正文，资源基目录指向插件包内的 skill/ 目录，脚本可直接以 python <base>/scripts/checkup.py 运行。"
+    },
+    "evidence": {
+      "install": "node test/smoke.mjs 通过；dsh plugin add 后 --dump-config 可见 mycfo-skill 行。",
+      "failureIsolation": "技能文件缺失时插件只告警、不影响 profile 启动。",
+      "hotReload": "skill 正文随插件包版本更新，重启 profile 生效。",
+      "remove": "dsh plugin --profile <name> remove dsh-mycfo 即移除。"
+    }
+  }
+}
