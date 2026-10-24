@@ -7,25 +7,36 @@
 
 ## 一键部署到 DSH
 
-### 方式 A：从 GitHub 直接装（推荐）
+### 方式 A：一行命令（已实测）
 
 ```bash
 dsh plugin --profile desktop add github:whoisjackchao-dot/myCFO
 ```
 
 DSH 会用 pnpm 把本仓库装进 profile，并自动加入 `dsh.profile.bundles`。**重启 DSH** 后生效。
+（已用 `dsh plugin --profile mycfo-test add github:...` 实测：安装、bundles 追加、`--dump-config` 出现插件行，全部通过。）
 
-### 方式 B：克隆后运行安装脚本
+### 方式 B：脚本一键（连仓库都不用手动 clone）
 
 ```powershell
-git clone https://github.com/whoisjackchao-dot/myCFO.git
-cd myCFO
-.\install.ps1              # Windows；默认装到 desktop profile
-# 或
-bash install.sh            # macOS / Linux
+# Windows：直接拉取并安装
+iwr https://raw.githubusercontent.com/whoisjackchao-dot/myCFO/main/install.ps1 -UseBasicParsing -OutFile "$env:TEMP\mycfo-install.ps1"; & "$env:TEMP\mycfo-install.ps1" -FromGitHub
 ```
 
-卸载：`dsh plugin --profile desktop remove dsh-mycfo`（或 `.\install.ps1 -Uninstall`）。
+```bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/whoisjackchao-dot/myCFO/main/install.sh -o /tmp/mycfo-install.sh
+bash /tmp/mycfo-install.sh desktop --github
+```
+
+也可以 clone 后直接运行 `.\install.ps1` / `bash install.sh`（默认装到 `desktop`，可用参数换 profile）。
+
+### 卸载与更新
+
+```bash
+dsh plugin --profile desktop remove dsh-mycfo     # 卸载
+dsh plugin --profile desktop update dsh-mycfo     # 更新（git 安装）/ 或重新运行安装脚本
+```
 
 ### 方式 C：不用插件，只当技能用
 
