@@ -1,0 +1,56 @@
+{
+  "company": {
+    "name": "杭州某某设计工作室（示例）",
+    "taxpayer": "small_scale",
+    "vat_rate": 0.01,
+    "city_tax_rate": 0.07,
+    "employees": 3,
+    "industry": "设计服务",
+    "annual_taxable_income_cap": 3000000
+  },
+  "period": {
+    "month": "2026-09",
+    "quarter": "2026Q3",
+    "quarter_sales_excl_tax": 820000
+  },
+  "pl": {
+    "revenue_excl_tax": 277227.72,
+    "cost_of_sales": 120000,
+    "operating_expenses": 30000,
+    "payroll": 45000,
+    "social_insurance": 6000,
+    "depreciation": 2000,
+    "interest_expense": 0,
+    "other_expenses": 0
+  },
+  "balance": {
+    "cash": 50000,
+    "accounts_receivable": 80000,
+    "inventory": 0,
+    "prepaid": 0,
+    "fixed_assets": 20000,
+    "other_assets": 0,
+    "accounts_payable": 40000,
+    "accrued_payroll": 15000,
+    "short_term_loans": 0,
+    "other_liabilities": 0
+  },
+  "cashflow": {
+    "weekly_fixed_costs": 14000,
+    "safety_buffer": 30000,
+    "receivables": [
+      {"name": "A 客户尾款", "amount": 30000, "due_week": 2},
+      {"name": "B 客户首款", "amount": 50000, "due_week": 5},
+      {"name": "C 客户年框", "amount": 40000, "due_week": 9}
+    ],
+    "payables": [
+      {"name": "办公室房租", "amount": 15000, "due_week": 1},
+      {"name": "外包设计费", "amount": 22000, "due_week": 3},
+      {"name": "设备分期", "amount": 8000, "due_week": 4}
+    ],
+    "tax_payments": [
+      {"name": "Q3 增值税及附加", "amount": 8692, "due_week": 1},
+      {"name": "Q3 企业所得税预缴", "amount": 3711, "due_week": 1}
+    ]
+  }
+}

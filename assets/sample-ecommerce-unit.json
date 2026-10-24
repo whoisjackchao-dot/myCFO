@@ -1,0 +1,45 @@
+{
+  "company": {
+    "name": "某某服饰店铺（示例：拼多多+淘宝，卫衣/内衣）",
+    "category": "卫衣/内衣",
+    "platforms": ["pinduoduo", "taobao_tmall"]
+  },
+  "assumptions": {
+    "platform_fee_rate": 0.006,
+    "logistics_per_order": 4.5,
+    "packaging_per_order": 1.5,
+    "return_shipping_per_return": 6.0,
+    "influencer_rate": 0.0,
+    "ad_spend": 60000,
+    "tax_rate": 0.01
+  },
+  "skus": [
+    {
+      "name": "加绒卫衣 A",
+      "price_incl_tax": 129,
+      "cost_incl_tax": 45,
+      "return_rate": 0.25,
+      "monthly_orders": 1200,
+      "stock": 800,
+      "sales_last_30d": 1200
+    },
+    {
+      "name": "基础圆领卫衣",
+      "price_incl_tax": 89,
+      "cost_incl_tax": 32,
+      "return_rate": 0.20,
+      "monthly_orders": 900,
+      "stock": 300,
+      "sales_last_30d": 900
+    },
+    {
+      "name": "无痕内衣 2 件装",
+      "price_incl_tax": 69,
+      "cost_incl_tax": 18,
+      "return_rate": 0.15,
+      "monthly_orders": 1500,
+      "stock": 2000,
+      "sales_last_30d": 1500
+    }
+  ]
+}

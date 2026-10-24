@@ -1,0 +1,24 @@
+{
+  "company": {
+    "name": "某某服饰电商（示例：拼多多+淘宝，档口进货）",
+    "profile": "ecommerce_retail",
+    "category": "卫衣/内衣",
+    "platforms": ["pinduoduo", "taobao_tmall"]
+  },
+  "year": {
+    "gmv_incl_tax": 4200000,
+    "return_rate": 0.25,
+    "platform_fee_rate": 0.006,
+    "logistics_rate": 0.06,
+    "ad_rate": 0.15,
+    "labor_rent": 250000,
+    "purchase_cost_rate": 0.35,
+    "invoice_ratio": 0.0,
+    "extra_cost_rate": 0.05,
+    "small_scale_rate": 0.01,
+    "general_rate": 0.13,
+    "city_tax_rate": 0.07,
+    "surcharge_half": true,
+    "cit_rate": 0.05
+  }
+}
